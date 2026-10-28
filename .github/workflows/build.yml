@@ -21,6 +21,21 @@ jobs:
           sdkmanager --install "ndk;27.2.12479018" "cmake;3.22.1"
           echo "ANDROID_NDK=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
 
+      - name: Fix source folder layout
+        run: |
+          mkdir -p src module
+
+          if [ -f module.cpp ] && [ ! -f src/module.cpp ]; then
+            mv module.cpp src/module.cpp
+          fi
+
+          for f in action.sh apps.txt config.txt customize.sh module.prop profiles.conf; do
+            if [ -f "$f" ] && [ ! -f "module/$f" ]; then
+              mv "$f" "module/$f"
+            fi
+          done
+
+
       - name: Download Zygisk API header
         run: |
           mkdir -p src
