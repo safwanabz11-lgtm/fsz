@@ -14,40 +14,24 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Android SDK
-        - uses: android-actions/setup-android@v4
-  with:
-    packages: ''
+        uses: android-actions/setup-android@v4
 
-      - name: Prepare source folders
+      - name: Install Android NDK and CMake
         run: |
-          mkdir -p src module
-
-          if [ -f module.cpp ] && [ ! -f src/module.cpp ]; then
-            mv module.cpp src/
-          fi
-
-          for f in action.sh apps.txt config.txt customize.sh module.prop profiles.conf; do
-            if [ -f "$f" ] && [ ! -f "module/$f" ]; then
-              if [ -f "$f" ]; then mv "$f" module/; fi
-            fi
-          done
-
-      - name: Install NDK and CMake
-        run: |
-          sdkmanager "ndk;27.2.12479018" "cmake;3.22.1"
+          sdkmanager --install "ndk;27.2.12479018" "cmake;3.22.1"
           echo "ANDROID_NDK=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
 
-      - name: Download Zygisk header
+      - name: Download Zygisk API header
         run: |
-          curl -fsSL -o src/zygisk.hpp \
-            https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp
+          mkdir -p src
+          curl -fsSL -o src/zygisk.hpp https://raw.githubusercontent.com/topjohnwu/zygisk-module-sample/master/module/jni/zygisk.hpp
 
       - name: Build module
         run: |
           chmod +x build.sh
           ./build.sh
 
-      - name: Upload ZIP artifact
+      - name: Upload module ZIP
         uses: actions/upload-artifact@v4
         with:
           name: badhon_game_profile
